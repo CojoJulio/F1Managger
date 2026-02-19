@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h1>Race Live</h1>
+  <button onclick="startRace()">Start Race</button>
+  <button onclick="stopRace()">Stop Race</button>
+  <pre id="lap"></pre>
+  <div id="leaderboard"></div>
+  <pre id="output"></pre>
+
+  <script>
+    const ws = new WebSocket("ws://127.0.0.1:8000/race/ws");
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === "telemetry") {
+          document.getElementById("output").textContent =
+            JSON.stringify(data.payload, null, 2);
+
+          document.getElementById("lap").textContent =
+            `Lap: ${data.payload.cars[0].state.lap}`;
+
+          document.getElementById("leaderboard").textContent =
+            `Leaderboard: ${data.payload.cars.map(car => car.pilot.name).join(" - ")}`;
+
+          
+      }
+
+      if (data.type === "overtake") {
+          document.getElementById("overtake").textContent =
+            JSON.stringify(data.payload, null, 2);
+      }
+
+
+    };
+
+    function stopRace() {
+      // Post API REST
+      fetch("http://127.0.0.1:8000/race/stop", {
+        method: "POST",
+      }).then((response) => {
+        if (response.ok) {
+          console.log("Race stopped successfully");
+    }})}
+
+    function startRace() {
+      // Post API REST
+      fetch("http://127.0.0.1:8000/race/start", {
+        method: "POST",
+      }).then((response) => {
+        if (response.ok) {
+          console.log("Race stopped successfully");
+    }})}
+
+
+  </script>
+</body>
+</html>
