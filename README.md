@@ -87,8 +87,6 @@ Ejecuta la API o simulación principal con:
 ```
 cd .\app\
 
-pip install -r requirements.txt
-
 python -m uvicorn main:app --reload
 ```
 
