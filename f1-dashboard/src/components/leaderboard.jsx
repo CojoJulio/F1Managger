@@ -1,5 +1,5 @@
 import { Clock, TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { useEffect, useState, memo} from 'react';
+import { memo } from 'react';
 
 
 // 2. Componente para el icono del neumático (Soft, Medium, Hard)
@@ -23,16 +23,13 @@ const TyreBadge = ({ type, age }) => {
 };
 
 // 3. Componente Principal
-const F1Leaderboard = (data) => {
-    const [drivers, setDrivers] = useState([]);
-
-    useEffect(() => {
-        setDrivers(data.drivers || []);
-    }, [data]); 
+const F1Leaderboard = ({ drivers: driversProp = [], onSelectDriver }) => {
+  // Render directly from props to ensure real-time updates
+  const drivers = driversProp || [];
 
    
   return (
-    <div className="w-full max-w-4xl mx-auto bg-[#15151e] text-white font-sans rounded-xl overflow-hidden shadow-2xl border border-gray-800">
+    <div  className="w-full max-w-4xl mx-auto bg-[#15151e] text-white font-sans rounded-xl overflow-hidden shadow-2xl border border-gray-800">
       
       {/* Header */}
       <div className="bg-[#1f1f27] p-4 border-b border-gray-700 flex justify-between items-center">
@@ -61,10 +58,14 @@ const F1Leaderboard = (data) => {
 
         {/* Filas de Pilotos */}
         <div className="divide-y divide-gray-800/50">
-          {drivers.map((driver, index) => (
+          {drivers.map((driver) => (
             <div 
-              key={driver.pilot.id} 
-              className="grid grid-cols-11 items-center px-4 py-3 hover:bg-[#2a2a35] transition-colors duration-200 group cursor-default"
+              key={driver.pilot.id}
+              className="grid grid-cols-11 items-center px-4 py-3 hover:bg-[#2a2a35] transition-colors duration-200 group cursor-pointer"
+              role="button"
+              tabIndex={0}
+              onClick={() => onSelectDriver && onSelectDriver(driver)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelectDriver && onSelectDriver(driver); }}
             >
               {/* Posición */}
               <div className="col-span-1 text-center font-bold text-lg font-mono">
@@ -90,7 +91,7 @@ const F1Leaderboard = (data) => {
               {/* Intervalo / Gap */}
               <div className="col-span-1 text-right font-mono text-sm text-yellow-400">
                 {driver.state.gap_to_leader ? (
-                  driver.state.gap_to_leader > 0 ? `+${driver.state.gap_to_leader.toFixed(3)}s` : `-${Math.abs(driver.state.gap_to_leader).toFixed(3)}s`
+                  driver.state.gap_to_leader > 0 ? `+${driver.state.gap_to_leader.toFixed(3)}` : `-${Math.abs(driver.state.gap_to_leader).toFixed(3)}s`
                 ) : (
                   "Leader"
                 )}

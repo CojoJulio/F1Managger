@@ -51,21 +51,6 @@ const TelemetryGraph = () => (
   </div>
 );
 
-const TrackMap = () => (
-  <div className="w-full h-full flex items-center justify-center relative bg-[#121218]">
-    {/* SVG Mapa Circuito (Simplificado) */}
-    <svg viewBox="0 0 200 150" className="w-3/4 h-3/4 stroke-white fill-none stroke-2 opacity-80 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
-      <path d="M40,120 L160,120 Q180,120 180,100 L180,50 Q180,30 160,30 L100,30 Q80,30 80,50 L80,80 Q80,100 60,100 L40,100 Q20,100 20,80 L20,60 Q20,40 40,40 Z" />
-      {/* Puntos de pilotos */}
-      <circle cx="160" cy="120" r="4" fill="#3671C6" className="animate-pulse" /> {/* Max */}
-      <circle cx="140" cy="120" r="4" fill="#FF8000" /> {/* Lando */}
-    </svg>
-    <div className="absolute top-4 left-4 text-[10px] font-mono text-gray-500">
-      SECTOR 2 <br/> <span className="text-yellow-400">YELLOW FLAG</span>
-    </div>
-  </div>
-);
-
 const RaceControl = () => (
   <div className="p-4 space-y-3 font-mono text-xs">
     <div className="flex gap-3 text-gray-300">
@@ -84,12 +69,13 @@ const RaceControl = () => (
   </div>
 );
 
-const PauseButton = memo(({ onPause, onResume, handlex2, handlex3 }) => (
+const PauseButton = memo(({ onPause, onResume, handlex2, handlex3, printdebug }) => (
   <div>
     <button className="w-full h-full bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors" onClick={onPause}>Pause</button>
     <button className="w-full h-full bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors" onClick={onResume}>Resume</button>
-    <button className="w-full h-full bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors" onClick={handlex2}>Velocidad x2</button>
+    {/* <button className="w-full h-full bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors" onClick={handlex2}>Velocidad x2</button> */}
     <button className="w-full h-full bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors" onClick={handlex3}>Velocidad x3</button>
+    <button className="w-full h-full bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors" onClick={printdebug}>Debug</button>
   </div>
 ));
 
@@ -100,6 +86,10 @@ const F1DashboardGrid = () => {
     const [raceMeta, setRaceMeta] = useState(null);
 
     const socketRef = useRef(null);
+
+    const [selectedDriver, setSelectedDriver] = useState(null);
+
+    const selectedCar = cars.find(car => car.id === selectedDriver?.id);
 
     useEffect(() => {
 
@@ -116,10 +106,12 @@ const F1DashboardGrid = () => {
 
                 if (data?.payload) {
                   if (data.payload.cars) {
-                    setCars(data.payload.cars);
+                    // Use an immutable copy to ensure React detects changes
+                    setCars(() => Array.isArray(data.payload.cars) ? [...data.payload.cars] : []);
                   }
-                  if  (data.payload.race) {
-                    setRaceMeta(data.payload.race);
+                  if (data.payload.race) {
+                    // Create a shallow clone for race meta
+                    setRaceMeta(() => (data.payload.race ? { ...data.payload.race } : null));
                   }
                 }
 
@@ -163,6 +155,11 @@ const F1DashboardGrid = () => {
       }
     }, []);
 
+    const printdebug = () => {
+      console.log(selectedDriver);
+      console.log(raceMeta);
+    }
+
   return (
     <div className="min-h-screen bg-black text-white p-4 md:p-6 font-sans selection:bg-red-500 selection:text-white">
       
@@ -177,10 +174,6 @@ const F1DashboardGrid = () => {
         </div>
       </header>
 
-      {/* --- GRID LAYOUT --- 
-          Definimos 4 columnas en desktop grande (lg), 3 en mediano (md) y 1 en movil.
-          La altura de las filas se ajusta automáticamente o definimos alturas fijas.
-      */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 grid-rows-[300px_250px_250px] gap-4">
         
         {/* 1. Main Feed (Video) - Ocupa 2 columnas y 1 fila */}
@@ -198,29 +191,26 @@ const F1DashboardGrid = () => {
         <BentoCard className="col-span-1 md:col-span-1 lg:col-span-1 row-span-3 overflow-y-auto custom-scrollbar" title="Leaderboard">
           {/* Aquí inyectamos el componente F1Leaderboard que hicimos antes */}
           <div className="p-2">
-             {raceMeta?.fastest_lap && 
+             {raceMeta?.fastest_lap &&
              <FastestLapBadge driverName={raceMeta.fastest_lap_car} lapTime={raceMeta.fastest_lap} />
              }
-             <F1Leaderboard drivers={cars || []}/> 
+             <F1Leaderboard drivers={cars || []} onSelectDriver={setSelectedDriver} /> 
              {/* Nota: Asegúrate de quitar el 'w-full max-w-4xl' del componente Leaderboard anterior para que se ajuste al contenedor del grid */}
           </div>
         </BentoCard>
 
         {/* 3. Track Map - Ocupa 1 columna */}
         <BentoCard className="col-span-1 md:col-span-1 lg:col-span-1 row-span-1" title="Tracker" icon={Map}>
-          {/* <TrackMap /> */}
-
-          <CircuitMap drivers= {cars}/>
-        
+          <CircuitMap drivers= {cars} selectedCar={selectedCar} />
         </BentoCard>
 
         {/* 4. Onboard Camera - Ocupa 1 columna */}
-        <BentoCard className="col-span-1 md:col-span-1 lg:col-span-1 row-span-1" title="Verstappen Onboard" icon={Video}>
+        <BentoCard className="col-span-1 md:col-span-1 lg:col-span-1 row-span-1" title={`${selectedCar?.pilot.name.split(" ")[1] || "Selected"} Onboard`} icon={Video}>
            <div className="w-full h-full bg-gray-800 relative">
               <div className="absolute bottom-4 left-4 right-4">
                  <div className="flex justify-between items-end">
                     <div className="bg-black/50 px-2 py-1 rounded text-[10px] font-mono border border-white/20">
-                       SPEED <span className="text-xl font-bold block text-white">302</span>
+                       SPEED <span className="text-xl font-bold block text-white">{selectedCar?.state.speed || 0}</span>
                     </div>
                     <div className="flex gap-1">
                         <div className="w-1 h-4 bg-green-500"></div>
@@ -238,7 +228,7 @@ const F1DashboardGrid = () => {
         </BentoCard>
 
         <BentoCard className="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 flex" title="Controls" icon={Activity}>
-            <PauseButton onPause={handlePause} onResume={handleResume} handlex2={handlex2} handlex3={handlex3} />
+            <PauseButton onPause={handlePause} onResume={handleResume} handlex2={handlex2} handlex3={handlex3} printdebug={printdebug} />
         </BentoCard> 
 
         {/* 6. Race Control - Ocupa 1 columna (o 2 dependiendo del espacio) */}
