@@ -1,3 +1,4 @@
+from core.sectortime import sectorTimeTick
 from core.gap import update_positions_and_gaps
 from core.pitstop import pitTick, checkPitEntry
 from core.overtake import updateDRS, tryOvertake, executeOvertake
@@ -13,17 +14,17 @@ def simulationTick(raceCar, track, deltaTime = 1):
         pitTick(raceCar, deltaTime)
         return
     
+    raceCar.state.totalTime += deltaTime
+    
     checkPitEntry(raceCar, track)
 
-    sector = getCurrentSector(track, raceCar.state)
-
     speed = calculateSpeed(track, raceCar.pilot, raceCar.car, raceCar.tyre, raceCar.state)
-
     raceCar.state.speed = speed
 
     avance = speed * deltaTime
     raceCar.state.lapProgress += avance / track.lapLength
-    raceCar.state.totalTime += deltaTime
+    
+    sectorTimeTick(raceCar, track, deltaTime)
 
     updateTyreWear(raceCar.tyre, raceCar.pilot, deltaTime, track, raceCar.state)
     updateFuel(raceCar.state, raceCar.pilot, deltaTime)

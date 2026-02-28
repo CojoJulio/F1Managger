@@ -17,9 +17,9 @@ def load_test_data():
         baseLapTime=100,
         pitTimeloss=22,
         sectors=[
-            Sector(id=1, name="S1", start=0, end=0.30, type="straight", lenght=1000, canOvertake=True, drsZone=True),
-            Sector(id=2, name="S2", start=0.30, end=0.80, type="fast_corner", lenght=1668, canOvertake=False, drsZone=False),
-            Sector(id=3, name="S3", start=0.80, end=1, type="slow_corner", lenght=669, canOvertake=False, drsZone=False)])
+            Sector(id=1, name="S1", start=0, end=0.25, type="straight", lenght=1000, canOvertake=True, drsZone=True),
+            Sector(id=2, name="S2", start=0.25, end=0.66, type="slow_corner", lenght=1668, canOvertake=False, drsZone=False),
+            Sector(id=3, name="S3", start=0.66, end=1, type="fast_corner", lenght=669, canOvertake=False, drsZone=False)])
     
     
     def createRaceCarState(id, pilot, car, tyre, team):

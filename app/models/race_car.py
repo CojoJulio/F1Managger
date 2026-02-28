@@ -10,6 +10,9 @@ class RaceCarState(BaseModel):
     totalTime: float = 0
     fuel: float = 100
     speed: float = 0
+    sector: int | None = None
+    sector_start_time: float = 0
+    sectors_times: list[float] = []
     position: int = 0
     in_pit: bool = False
     pit_time_remaining: float = 0
@@ -27,3 +30,4 @@ class RaceCar(BaseModel):
     tyre: Tyre
     state: RaceCarState = RaceCarState()
     lap_history: list[float] = []
+    sector_history: list[float] = []

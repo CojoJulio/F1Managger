@@ -160,6 +160,34 @@ const F1DashboardGrid = () => {
       console.log(raceMeta);
     }
 
+    const startrace = () => {
+      fetch('http://127.0.0.1:8000/race/start', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      })
+    }
+
+    const stoprace = () => {
+      fetch('http://127.0.0.1:8000/race/stop', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      })
+      fetch('http://127.0.0.1:8000/race/start', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      })
+    }
+    
+
   return (
     <div className="min-h-screen bg-black text-white p-4 md:p-6 font-sans selection:bg-red-500 selection:text-white">
       
@@ -169,6 +197,8 @@ const F1DashboardGrid = () => {
           F1<span className="text-red-600">TV</span> <span className="font-normal text-gray-500 text-lg not-italic tracking-normal ml-2">PRO DASHBOARD</span>
         </h1>
         <div className="flex gap-4">
+            <button onClick={startrace} className="bg-red-600 hover:bg-red-700 px-4 py-1 rounded text-xs font-bold uppercase transition-colors">Start</button>
+            <button onClick={stoprace} className="bg-red-600 hover:bg-red-700 px-4 py-1 rounded text-xs font-bold uppercase transition-colors">Restart</button>
             <button className="bg-red-600 hover:bg-red-700 px-4 py-1 rounded text-xs font-bold uppercase transition-colors">Live</button>
             <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-xs">JP</div>
         </div>
