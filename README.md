@@ -90,6 +90,12 @@ cd .\app\
 python -m uvicorn main:app --reload
 ```
 
+## 📚 Documentación interactiva
+
+La documentación Swagger está disponible en:
+
+http://localhost:8000/docs
+
 ---
 
 ## 📬 Contacto
